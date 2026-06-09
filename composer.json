@@ -1,0 +1,51 @@
+{
+    "name": "naram/laravel-page-visits",
+    "description": "Redis-buffered, signature-verified page visit tracking for Laravel.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "page-visits",
+        "analytics",
+        "redis",
+        "tracking"
+    ],
+    "homepage": "https://github.com/Naram-Alkoht/laravel-page-visits",
+    "authors": [
+        {
+            "name": "naram alkoht",
+            "email": "naramalkoht@hotmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/Naram-Alkoht/laravel-page-visits/issues",
+        "source": "https://github.com/Naram-Alkoht/laravel-page-visits"
+    },
+    "require": {
+        "php": "^8.4",
+        "ext-redis": "*",
+        "illuminate/console": "^13.0",
+        "illuminate/contracts": "^13.0",
+        "illuminate/database": "^13.0",
+        "illuminate/http": "^13.0",
+        "illuminate/support": "^13.0",
+        "illuminate/view": "^13.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Naram\\PageVisits\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Naram\\PageVisits\\PageVisitsServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
