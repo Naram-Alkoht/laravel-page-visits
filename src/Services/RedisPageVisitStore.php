@@ -59,9 +59,13 @@ final readonly class RedisPageVisitStore implements PageVisitStore
     public function pending(): array
     {
         /** @var array<int, string> $members */
-        $members = $this->connection()->smembers($this->pendingIndexKey());
+        $members = $this->client()->eval(
+            "return redis.call('SMEMBERS', KEYS[1])",
+            [$this->pendingIndexKey()],
+            1,
+        );
 
-        if ($members === []) {
+        if (! is_array($members) || $members === []) {
             return [];
         }
 
