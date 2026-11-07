@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Naram\PageVisits;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use Naram\PageVisits\Console\FlushPageVisitsCommand;
 use Naram\PageVisits\Contracts\PageVisitStore;
 use Naram\PageVisits\Http\Controllers\PageVisitController;
+use Naram\PageVisits\Services\DatabasePageVisitStore;
 use Naram\PageVisits\Services\RedisPageVisitStore;
 use Naram\PageVisits\View\Components\VisitTracker;
 
@@ -20,7 +22,10 @@ final class PageVisitsServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom($this->packagePath('config/page-visits.php'), 'page-visits');
 
-        $this->app->singleton(PageVisitStore::class, RedisPageVisitStore::class);
+        $this->app->singleton(PageVisitStore::class, fn (Application $app): PageVisitStore => match (Config::string('page-visits.driver')) {
+            'redis' => $app->make(RedisPageVisitStore::class),
+            'database' => $app->make(DatabasePageVisitStore::class),
+        });
     }
 
     public function boot(): void

@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 return [
     'enabled' => env('PAGE_VISITS_ENABLED', true),
+
+    /*
+     * Where visits are counted: "redis" buffers them until page-visits:flush runs,
+     * "database" adds them straight to the daily page_visits row.
+     */
+    'driver' => env('PAGE_VISITS_DRIVER', 'redis'),
+
     'redis_connection' => env('PAGE_VISITS_REDIS_CONNECTION', 'cache'),
     'redis_prefix' => env('PAGE_VISITS_REDIS_PREFIX', 'page-visits'),
     'default_ttl_seconds' => (int) env('PAGE_VISITS_DEFAULT_TTL_SECONDS', 60 * 60 * 6),

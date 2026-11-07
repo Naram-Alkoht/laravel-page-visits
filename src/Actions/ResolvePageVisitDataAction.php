@@ -17,7 +17,7 @@ final readonly class ResolvePageVisitDataAction
         private PageVisitSigner $signer,
     ) {}
 
-    public function execute(Request $request): ?PageVisitViewData
+    public function execute(Request $request, ?Model $visitable = null): ?PageVisitViewData
     {
         $routeName = $request->route()?->getName();
 
@@ -25,7 +25,7 @@ final readonly class ResolvePageVisitDataAction
             return null;
         }
 
-        $pageKey = $this->resolvePageKey($routeName, $this->resolveVisitable($request));
+        $pageKey = $this->resolvePageKey($routeName, $visitable ?? $this->resolveVisitable($request));
 
         return new PageVisitViewData(
             pageKey: $pageKey,

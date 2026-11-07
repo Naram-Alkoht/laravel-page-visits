@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 use Naram\PageVisits\Actions\PageVisitFlusher;
 
 #[Signature('page-visits:flush')]
-#[Description('Flush pending page visit counters from Redis into the database')]
+#[Description('Flush pending page visit counters into the database')]
 final class FlushPageVisitsCommand extends Command
 {
     public function handle(PageVisitFlusher $flusher): int

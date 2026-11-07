@@ -1,6 +1,6 @@
 {
     "name": "naram/laravel-page-visits",
-    "description": "Redis-buffered, signature-verified page visit tracking for Laravel.",
+    "description": "Aggregated, signature-verified page visit tracking for Laravel, with Redis and database drivers.",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -23,13 +23,15 @@
     },
     "require": {
         "php": "^8.4",
-        "ext-redis": "*",
         "illuminate/console": "^13.0",
         "illuminate/contracts": "^13.0",
         "illuminate/database": "^13.0",
         "illuminate/http": "^13.0",
         "illuminate/support": "^13.0",
         "illuminate/view": "^13.0"
+    },
+    "suggest": {
+        "ext-redis": "Required by the redis driver, which is the default."
     },
     "autoload": {
         "psr-4": {

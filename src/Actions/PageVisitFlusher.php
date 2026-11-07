@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Naram\PageVisits\Actions;
 
-use Illuminate\Support\Facades\DB;
 use Naram\PageVisits\Contracts\PageVisitStore;
 use Naram\PageVisits\Models\PageVisit;
 
@@ -30,20 +29,7 @@ final readonly class PageVisitFlusher
         $flushedVisits = 0;
 
         foreach ($this->store->pending() as $pendingPageVisit) {
-            PageVisit::query()->upsert(
-                values: [
-                    'date' => $pendingPageVisit->date,
-                    'page_key' => $pendingPageVisit->pageKey,
-                    'route_name' => $pendingPageVisit->routeName,
-                    'visitable_type' => $pendingPageVisit->visitableType,
-                    'visitable_id' => $pendingPageVisit->visitableId,
-                    'views' => $pendingPageVisit->views,
-                ],
-                uniqueBy: ['date', 'page_key'],
-                update: [
-                    'views' => DB::raw('views + '.$pendingPageVisit->views),
-                ],
-            );
+            PageVisit::applyPending($pendingPageVisit);
 
             $this->store->commit($pendingPageVisit);
             $flushedVisits++;

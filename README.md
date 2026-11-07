@@ -1,17 +1,28 @@
 # Laravel Page Visits
 
-Redis-buffered, signature-verified page-visit tracking for Laravel.
+Aggregated, signature-verified page-visit tracking for Laravel.
 
-Page views are counted in Redis on each request and folded into the database on a
-schedule, so high-traffic pages never write a row per hit. Each tracked page is
-signed with an HMAC so the front-end tracker can't be used to inflate arbitrary
-counters.
+Each page keeps one row per day with a `views` counter, so a page with 200,000
+visits has hundreds of rows, not 200,000. Each tracked page is signed with an HMAC
+so the front-end tracker can't be used to inflate arbitrary counters.
+
+## Drivers
+
+| Driver | How visits are counted | Needs |
+| --- | --- | --- |
+| `redis` (default) | Buffered in Redis, then added to `page_visits` by `page-visits:flush` | `ext-redis`, a scheduled flush |
+| `database` | Added straight to the daily `page_visits` row | Nothing extra, and no flush |
+
+Both drivers write the same `page_visits` rows, so reading totals does not change.
+Use `redis` on very busy sites, where one database write per counted visit is too
+many. The `database` driver keeps a short-lived hash per visitor and page in
+`page_visit_fingerprints` for the de-dupe window. Totals never read that table.
 
 ## Requirements
 
 - PHP `^8.4`
 - Laravel `^13.0`
-- Redis (`ext-redis` / phpredis)
+- `ext-redis` / phpredis, for the `redis` driver only
 
 ## Installation
 
@@ -42,6 +53,7 @@ Available publish tags: `page-visits-config`, `page-visits-migrations`,
 | Key | Default | Purpose |
 | --- | --- | --- |
 | `enabled` (`PAGE_VISITS_ENABLED`) | `true` | Master switch. |
+| `driver` (`PAGE_VISITS_DRIVER`) | `redis` | `redis` or `database`. |
 | `redis_connection` (`PAGE_VISITS_REDIS_CONNECTION`) | `cache` | Redis connection used for buffering. |
 | `redis_prefix` (`PAGE_VISITS_REDIS_PREFIX`) | `page-visits` | Key namespace. |
 | `default_ttl_seconds` (`PAGE_VISITS_DEFAULT_TTL_SECONDS`) | `21600` | De-dupe window per visitor fingerprint. |
@@ -100,13 +112,21 @@ final class Post extends Model
 
 ```php
 $post->pageVisits; // MorphMany<PageVisit>
-$post->pageVisits()->sum('visits');
+$post->pageVisits()->sum('views');
+```
+
+The tracker finds the model in the route parameters. When a controller takes a slug
+and loads the model itself, pass the model to the component:
+
+```blade
+<x-visit-tracker :visitable="$post" />
 ```
 
 ### Flushing buffered counts
 
-Counts live in Redis until flushed to the database. Run the command on a schedule
-in your app's `routes/console.php`:
+The `database` driver has nothing to flush. With the `redis` driver, counts live in
+Redis until flushed to the database. Run the command on a schedule in your app's
+`routes/console.php`:
 
 ```php
 use Illuminate\Support\Facades\Schedule;
@@ -126,7 +146,7 @@ Schedule::command(FlushPageVisitsCommand::class)
 ## Extending
 
 `Naram\PageVisits\Contracts\PageVisitStore` is the seam for the buffering backend.
-The package binds it to `RedisPageVisitStore`; rebind it in a service provider to
+The package binds it from the `driver` config; rebind it in a service provider to
 provide your own implementation.
 
 ## License
